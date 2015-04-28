@@ -64,7 +64,7 @@ public class MetricsProcessor {
 
         // loop through and serialize the metrics and send them as we fill the buffer up to max buffer
         for (int i = 0; i < drainedMetrics.size(); i++) {
-            // ponder if one of the host is disconnected
+            // TODO ponder if one of the host is disconnected and stays that way
             if (i == nextRotateIndex) {
                 // flush the current remaining data queued before moving to the next sender
                 outputBuffer = write(currentSender, outputBuffer);

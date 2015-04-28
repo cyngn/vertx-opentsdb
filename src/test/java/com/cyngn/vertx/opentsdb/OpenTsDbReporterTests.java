@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author truelove@cyngn.com (Jeremy Truelove) 11/10/14
  */
-//@Ignore("Integration tests, comment out annotation to run the tests")
+@Ignore("Integration tests, comment out annotation to run the tests")
 @RunWith(VertxUnitRunner.class)
 public class OpenTsDbReporterTests {
 
@@ -142,7 +142,7 @@ public class OpenTsDbReporterTests {
                     context.fail();
                 }
 
-                context.assertEquals("Ok", result.result().body());
+                context.assertEquals("ok", result.result().body());
                 async.complete();
             }
         });
@@ -162,7 +162,7 @@ public class OpenTsDbReporterTests {
 
         Handler<AsyncResult<Message<JsonObject>>> handler = result -> {
             if (result.failed()) { context.fail(); }
-            context.assertEquals("Ok", result.result().body());
+            context.assertEquals("ok", result.result().body());
             if(count.incrementAndGet() == totalMessages) { async.complete(); }
         };
 

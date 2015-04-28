@@ -47,4 +47,32 @@ public class Util {
 
         return tagsString;
     }
+
+    /**
+     * Create a metric object for sending to the OpenTsDb lib
+     *
+     * @param name the metric name
+     * @param value the metric value
+     * @return the properly constructed metric object
+     */
+    public static JsonObject createMetric(String name, String value) {
+        return createMetric(name, value, null);
+    }
+
+    /**
+     * Create a metric object for sending to the OpenTsDb lib
+     *
+     * @param name the metric name
+     * @param value the metric value
+     * @param tags the tags to associate to this metric
+     * @return the properly constructed metric object
+     */
+    public static JsonObject createMetric(String name, String value, JsonObject tags) {
+        JsonObject obj = new JsonObject().put(OpenTsDbReporter.ACTION_FIELD, OpenTsDbReporter.ADD_COMMAND)
+                .put(MetricsParser.NAME_FIELD, name).put(MetricsParser.VALUE_FIELD, value);
+        if(tags != null && tags.size() > 0) {
+            obj.put(MetricsParser.TAGS_FIELD, tags);
+        }
+        return obj;
+    }
 }

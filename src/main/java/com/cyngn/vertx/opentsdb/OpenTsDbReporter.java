@@ -44,8 +44,10 @@ import java.util.function.Consumer;
 public class OpenTsDbReporter extends AbstractVerticle implements Handler<Message<JsonObject>> {
 
     public final static String ERROR_MESSAGE_ADDRESS = "vertx-opentsdb-errors";
+    public final static String DEFAULT_ADDRESS = "vertx.opentsdb-reporter";
     private Logger logger = LoggerFactory.getLogger(OpenTsDbClient.class);
     public static final String ADD_COMMAND = "add";
+    public static final String ACTION_FIELD = "action";
     public static final int OPENTSDB_DEFAULT_MAX_TAGS = 8;
     private static int FIVE_MINUTES_MILLI = 1000 * 60 * 5;
 
@@ -75,7 +77,7 @@ public class OpenTsDbReporter extends AbstractVerticle implements Handler<Messag
         hosts = config.getJsonArray("hosts", new JsonArray("[{ \"host\" : \"localhost\", \"port\" : 4242}]"));
         maxBufferSizeInBytes = config.getInteger("maxBufferSizeInBytes", DEFAULT_MTU);
         String prefix = config.getString("prefix", null);
-        address = config.getString("address", "vertx.opentsdb-reporter");
+        address = config.getString("address", DEFAULT_ADDRESS);
         maxTags = config.getInteger("maxTags", OPENTSDB_DEFAULT_MAX_TAGS);
         flushInterval = config.getInteger("flushIntervalMilli", 1000);
         maxBacklog = config.getInteger("maxMetricBacklog", Integer.MIN_VALUE);
@@ -170,7 +172,7 @@ public class OpenTsDbReporter extends AbstractVerticle implements Handler<Messag
             if(maxBacklog == Integer.MIN_VALUE || metrics.size() < maxBacklog) {
                 // put the metric in the work queue
                 metrics.add(metricStr);
-                message.reply("Ok");
+                message.reply("ok");
             } else {
                 String errMsg = String.format("Backlog is at max defined capacity of %d, discarding metric", metrics.size());
                 logger.warn(errMsg);
@@ -186,7 +188,7 @@ public class OpenTsDbReporter extends AbstractVerticle implements Handler<Messag
      */
     @Override
     public void handle(Message<JsonObject> message) {
-        String action = message.body().getString("action");
+        String action = message.body().getString(ACTION_FIELD);
 
         if (action == null ) { sendError(message, "You must specify an action"); }
 

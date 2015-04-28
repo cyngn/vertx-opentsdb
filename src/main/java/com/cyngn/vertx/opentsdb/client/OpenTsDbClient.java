@@ -32,8 +32,6 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
     private final EventBus bus;
     private Logger logger = LoggerFactory.getLogger(OpenTsDbClient.class);
 
-    private Buffer readData;
-
     private NetSocket connection;
 
     private long initialBackOffMilli = 1000;
@@ -58,8 +56,6 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
 
         this.host = host;
         this.port = port;
-
-        readData = Buffer.factory.buffer();
 
         netClient.connect(port, host, new AsyncResultHandler<NetSocket>() {
             @Override
