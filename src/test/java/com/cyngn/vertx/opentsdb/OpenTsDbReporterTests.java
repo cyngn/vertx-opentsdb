@@ -61,16 +61,13 @@ public class OpenTsDbReporterTests {
 
         Async async = context.async();
         vertx.deployVerticle(OpenTsDbReporter.class.getName(), new DeploymentOptions().setConfig(config),
-                new AsyncResultHandler<String>() {
-            @Override
-            public void handle(AsyncResult<String> result) {
-                if (!result.succeeded()) {
-                    result.cause().printStackTrace();
-                    context.fail(result.cause());
-                }
-                async.complete();
-            }
-        });
+                result -> {
+                    if (!result.succeeded()) {
+                        result.cause().printStackTrace();
+                        context.fail(result.cause());
+                    }
+                    async.complete();
+                });
     }
 
     @After

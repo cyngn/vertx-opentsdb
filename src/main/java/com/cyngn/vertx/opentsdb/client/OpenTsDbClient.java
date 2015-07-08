@@ -9,7 +9,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
@@ -57,14 +57,11 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
         this.host = host;
         this.port = port;
 
-        netClient.connect(port, host, new AsyncResultHandler<NetSocket>() {
-            @Override
-            public void handle(AsyncResult<NetSocket> connectResult) {
-                onInitialized.accept(connectResult.succeeded());
-                if (connectResult.succeeded()) {
-                   onConnect(connectResult.result());
-                } // if we don't succeed initially we'll fail startup of the reporter
-            }
+        netClient.connect(port, host, connectResult -> {
+            onInitialized.accept(connectResult.succeeded());
+            if (connectResult.succeeded()) {
+               onConnect(connectResult.result());
+            } // if we don't succeed initially we'll fail startup of the reporter
         });
     }
 
