@@ -124,8 +124,11 @@ public class OpenTsDbReporter extends AbstractVerticle implements Handler<Messag
             OpenTsDbClient worker = new OpenTsDbClient(jsonHost.getString("host"), jsonHost.getInteger("port"), vertx,
               success -> {
                 if(!success) {
-                    logger.error(String.format("Failed to connect to host: %s", jsonHost.encode()));
+                    String error = String.format("Failed to connect to host: %s", jsonHost.encode());
+                    logger.error(error);
                     vertx.close();
+                    startedResult.fail(error);
+                    return;
                 }
 
                 count.incrementAndGet();

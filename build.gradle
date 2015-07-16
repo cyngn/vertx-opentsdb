@@ -1,6 +1,6 @@
 apply plugin: 'java'
 
-version = '0.5.0'
+version = '0.5.1'
 
 if (!JavaVersion.current().java8Compatible) {
     throw new IllegalStateException('''A Haiku:
