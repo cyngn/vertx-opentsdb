@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/cyngn/vertx-opentsdb.svg?branch=master)](https://travis-ci.org/cyngn/vertx-opentsdb)
+
 # vert.x OpenTsDb
 
 This library allows you to save metrics into an OpenTsDb cluster. Which is a time series db for tracking service and business metrics.
