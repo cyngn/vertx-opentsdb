@@ -14,6 +14,8 @@
  */
 package com.cyngn.vertx.opentsdb;
 
+import com.cyngn.vertx.opentsdb.client.EventBusMessage;
+import com.cyngn.vertx.opentsdb.service.OpenTsDbService;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
@@ -41,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Ignore("Integration tests, comment out annotation to run the tests")
 @RunWith(VertxUnitRunner.class)
-public class OpenTsDbReporterTests {
+public class OpenTsDbServiceTests {
 
     Vertx vertx;
     private EventBus eb;
@@ -57,10 +59,10 @@ public class OpenTsDbReporterTests {
         JsonArray array = new JsonArray();
         array.add(new JsonObject().put("host", "localhost").put("port", 4242));
         config.put("hosts", array);
-        config.put("maxTags", 1);
+        config.put("max_tags", 1);
 
         Async async = context.async();
-        vertx.deployVerticle(OpenTsDbReporter.class.getName(), new DeploymentOptions().setConfig(config),
+        vertx.deployVerticle(OpenTsDbService.class.getName(), new DeploymentOptions().setConfig(config),
                 result -> {
                     if (!result.succeeded()) {
                         result.cause().printStackTrace();
@@ -108,7 +110,7 @@ public class OpenTsDbReporterTests {
     @Test
     public void testNoTags(TestContext context) throws Exception {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "34.4");
         Async async = context.async();
@@ -126,7 +128,29 @@ public class OpenTsDbReporterTests {
     @Test
     public void testSend(TestContext context) throws Exception {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
+        metric.put("name", "test.value");
+        metric.put("value", "34.4");
+        metric.put("tags", new JsonObject().put("foo", "bar"));
+
+        Async async = context.async();
+        eb.send(topic, metric, new DeliveryOptions(), new Handler<AsyncResult<Message<JsonObject>>>() {
+            @Override
+            public void handle(AsyncResult<Message<JsonObject>> result) {
+                if (result.failed()) {
+                    context.fail();
+                }
+
+                context.assertEquals("ok", result.result().body());
+                async.complete();
+            }
+        });
+    }
+
+    @Test
+    public void testSendBulk(TestContext context) throws Exception {
+        JsonObject metric = new JsonObject();
+        metric.put("action", OpenTsDbService.ADD_ALL_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "34.4");
         metric.put("tags", new JsonObject().put("foo", "bar"));
@@ -148,7 +172,7 @@ public class OpenTsDbReporterTests {
     @Test
     public void testSendMany(TestContext context) throws Exception {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "34.4");
         metric.put("tags", new JsonObject().put("foo", "bar"));
@@ -169,7 +193,7 @@ public class OpenTsDbReporterTests {
     @Test
     public void testTooManyTags(TestContext context) throws Exception {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "34.4");
         metric.put("tags",
@@ -190,13 +214,13 @@ public class OpenTsDbReporterTests {
     @Test
     public void testSendIllegalCharacters(TestContext context) throws Exception {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "@@@@test@value");
         metric.put("value", "34.4");
         metric.put("tags", new JsonObject().put("foo", "bar"));
 
         Async async = context.async();
-        eb.consumer(OpenTsDbReporter.ERROR_MESSAGE_ADDRESS, new Handler<Message<JsonObject>>() {
+        eb.consumer(OpenTsDbService.ERROR_MESSAGE_ADDRESS, new Handler<Message<JsonObject>>() {
             @Override
             public void handle(Message<JsonObject> event) {
                 context.assertEquals(EventBusMessage.INVALID_DATA.toString(), event.body().getString("error"));

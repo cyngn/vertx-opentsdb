@@ -1,9 +1,21 @@
-package com.cyngn.vertx.opentsdb.client;
+/*
+ * Copyright 2015 Cyanogen Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+package com.cyngn.vertx.opentsdb.service.client;
 
-import com.cyngn.vertx.opentsdb.EventBusMessage;
-import com.cyngn.vertx.opentsdb.OpenTsDbReporter;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
+import com.cyngn.vertx.opentsdb.client.EventBusMessage;
+import com.cyngn.vertx.opentsdb.service.OpenTsDbService;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
@@ -60,7 +72,7 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
         netClient.connect(port, host, connectResult -> {
             onInitialized.accept(connectResult.succeeded());
             if (connectResult.succeeded()) {
-               onConnect(connectResult.result());
+                onConnect(connectResult.result());
             } // if we don't succeed initially we'll fail startup of the reporter
         });
     }
@@ -97,16 +109,13 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
 
     private void reconnect() {
         logger.info(String.format("Reconnecting to host: %s port: %d", host, port));
-        netClient.connect(port, host, new AsyncResultHandler<NetSocket>() {
-            @Override
-            public void handle(AsyncResult<NetSocket> connectResult) {
-                if (connectResult.succeeded()) {
-                    onConnect(connectResult.result());
-                } else {
-                    long reconnectIn = processReconnect();
-                    logger.info(String.format("Failed to connect to host: %s port: %d, will re-attempt in %d(ms)", host,
-                            port, reconnectIn));
-                }
+        netClient.connect(port, host, connectResult -> {
+            if (connectResult.succeeded()) {
+                onConnect(connectResult.result());
+            } else {
+                long reconnectIn = processReconnect();
+                logger.info(String.format("Failed to connect to host: %s port: %d, will re-attempt in %d(ms)", host,
+                        port, reconnectIn));
             }
         });
     }
@@ -123,9 +132,11 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
      * @param buffer
      */
     private void onDataReceived(Buffer buffer) {
-        logger.error("Got data from agent: " + buffer.toString(StandardCharsets.UTF_8.toString()) + " this is not expected");
+        String openTsDbError = buffer.toString(StandardCharsets.UTF_8.toString());
+        logger.error("Got data from agent: " + openTsDbError + " this is not expected");
         // let the user know if they failed to write because the data is invalid
-        bus.send(OpenTsDbReporter.ERROR_MESSAGE_ADDRESS, new JsonObject().put("error", EventBusMessage.INVALID_DATA));
+        bus.send(OpenTsDbService.ERROR_MESSAGE_ADDRESS, new JsonObject().put("error", EventBusMessage.INVALID_DATA)
+                .put("message", openTsDbError));
         errorsReceived++;
     }
 
@@ -138,6 +149,8 @@ public class OpenTsDbClient implements MetricsSender, Closeable {
             return false;
         }
         connection.write(metricData);
+
+        if(logger.isDebugEnabled()) { logger.debug(metricData); }
         bytesWrittenForPeriod += metricData.length();
         return true;
     }

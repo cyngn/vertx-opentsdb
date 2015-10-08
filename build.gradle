@@ -2,7 +2,7 @@ apply plugin: 'java'
 // Uncomment below when doing official builds
 //apply from: "gradle/sona.gradle"
 
-version = '0.5.1'
+version = '0.7.0'
 group = "com.cyngn.vertx"
 archivesBaseName = "vertx-opentsdb"
 
@@ -21,11 +21,16 @@ repositories {
 }
 
 dependencies {
-    compile 'io.vertx:vertx-core:3.0.0'
+    compile 'io.vertx:vertx-core:3.1.0'
     compile "joda-time:joda-time:2.4"
     compile "com.google.guava:guava:18.0"
+    compile "org.apache.commons:commons-lang3:3.4"
     testCompile "junit:junit:4.11"
-    testCompile "io.vertx:vertx-unit:3.0.0"
+    testCompile "io.vertx:vertx-unit:3.1.0"
+    testCompile "io.vertx:vertx-web:3.1.0"
+    testCompile 'io.vertx:vertx-web:3.1.0:tests'
+    testCompile 'io.vertx:vertx-core:3.1.0:tests'
+    testCompile "org.mockito:mockito-core:1.9.5"
 }
 
 task wrapper(type: Wrapper) {

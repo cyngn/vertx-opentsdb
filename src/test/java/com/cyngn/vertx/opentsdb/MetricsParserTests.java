@@ -14,6 +14,8 @@
  */
 package com.cyngn.vertx.opentsdb;
 
+import com.cyngn.vertx.opentsdb.service.MetricsParser;
+import com.cyngn.vertx.opentsdb.service.OpenTsDbService;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -37,7 +39,7 @@ public class MetricsParserTests  {
     private BiConsumer<Message<JsonObject>, String> errorHandler;
     private Integer count;
 
-    private Message<JsonObject> getTestMessage(JsonObject obj) {
+    public Message<JsonObject> getTestMessage(JsonObject obj) {
         return new Message<JsonObject>() {
             @Override
             public String address() { return null; }
@@ -76,7 +78,7 @@ public class MetricsParserTests  {
     @Test
     public void missingNameTest() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("value", "34.4");
         metric.put("tags", new JsonObject().put("foo", "bar"));
 
@@ -84,7 +86,7 @@ public class MetricsParserTests  {
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, "", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertEquals(null, result);
         assertTrue(count == 1);
@@ -93,14 +95,14 @@ public class MetricsParserTests  {
     @Test
     public void missingValueTest() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("tags", new JsonObject().put("foo", "bar"));
 
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, "", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertEquals(null, result);
         assertTrue(count == 1);
@@ -109,14 +111,14 @@ public class MetricsParserTests  {
     @Test
     public void missingTagsTest() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "17");
 
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, "", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertEquals(null, result);
         assertTrue(count == 1);
@@ -125,14 +127,14 @@ public class MetricsParserTests  {
     @Test
     public void defaultTagsTest() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "17");
 
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, "foo=bar", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertTrue(Pattern.compile("put test.value \\d* 17 foo=bar\\n").matcher(result).matches());
         assertTrue(count == 0);
@@ -141,7 +143,7 @@ public class MetricsParserTests  {
     @Test
     public void parseTestSimple() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "17");
         metric.put("tags", new JsonObject().put("tag1", "val1").put("tag2", "val2"));
@@ -149,7 +151,7 @@ public class MetricsParserTests  {
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, "foo=bar", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertTrue(Pattern.compile("put test.value \\d* 17 foo=bar tag1=val1 tag2=val2\\n").matcher(result).matches());
         assertTrue(count == 0);
@@ -158,7 +160,7 @@ public class MetricsParserTests  {
     @Test
     public void parseTestNoDefaultTags() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "17");
         metric.put("tags", new JsonObject().put("tag1", "val1").put("tag2", "val2"));
@@ -166,7 +168,7 @@ public class MetricsParserTests  {
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser(null, null, errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertTrue(Pattern.compile("put test.value \\d* 17 tag1=val1 tag2=val2\\n").matcher(result).matches());
         assertTrue(count == 0);
@@ -175,7 +177,7 @@ public class MetricsParserTests  {
     @Test
     public void parseTestPrefix() {
         JsonObject metric = new JsonObject();
-        metric.put("action", OpenTsDbReporter.ADD_COMMAND);
+        metric.put("action", OpenTsDbService.ADD_COMMAND);
         metric.put("name", "test.value");
         metric.put("value", "17");
         metric.put("tags", new JsonObject().put("tag1", "val1").put("tag2", "val2"));
@@ -183,7 +185,7 @@ public class MetricsParserTests  {
         Message<JsonObject> msg = getTestMessage(metric);
 
         MetricsParser parser = new MetricsParser("test.service", "foo=bar", errorHandler);
-        String result = parser.createMetricString(msg);
+        String result = parser.createMetricString(msg, msg.body());
 
         assertTrue(Pattern.compile("put test.service.test.value \\d* 17 foo=bar tag1=val1 tag2=val2\\n").matcher(result).matches());
         assertTrue(count == 0);

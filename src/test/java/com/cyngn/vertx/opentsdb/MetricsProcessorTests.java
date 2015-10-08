@@ -14,9 +14,9 @@
  */
 package com.cyngn.vertx.opentsdb;
 
-import com.cyngn.vertx.opentsdb.client.MetricsSender;
+import com.cyngn.vertx.opentsdb.service.MetricsProcessor;
+import com.cyngn.vertx.opentsdb.service.client.MetricsSender;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.EventBus;
 import org.junit.Before;
 import org.junit.Test;
 
