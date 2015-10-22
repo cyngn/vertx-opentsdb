@@ -25,6 +25,7 @@ dependencies {
     compile "joda-time:joda-time:2.4"
     compile "com.google.guava:guava:18.0"
     compile "org.apache.commons:commons-lang3:3.4"
+    compile "io.vertx:vertx-codegen:3.1.0"
     testCompile "junit:junit:4.11"
     testCompile "io.vertx:vertx-unit:3.1.0"
     testCompile "io.vertx:vertx-web:3.1.0"

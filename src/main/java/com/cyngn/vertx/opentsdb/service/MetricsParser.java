@@ -60,6 +60,7 @@ public class MetricsParser {
      * @param metric the metric object
      * @return the metric string or null if it is invalid
      */
+    @SuppressWarnings("unchecked")
     public String createMetricString(Message message, JsonObject metric) {
         String metricName = metric.getString(NAME_FIELD, "");
         if (StringUtils.isEmpty(metricName)) {
