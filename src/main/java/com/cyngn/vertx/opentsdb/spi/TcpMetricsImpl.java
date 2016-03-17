@@ -72,7 +72,7 @@ public class TcpMetricsImpl extends ScheduledMetrics implements TCPMetrics<Socke
     }
 
     @Override
-    public SocketMetric connected(SocketAddress remoteAddress) {
+    public SocketMetric connected(SocketAddress remoteAddress, String remoteName) {
         connectionCount.incrementAndGet();
         return null;
     }

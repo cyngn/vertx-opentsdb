@@ -25,7 +25,6 @@ import io.vertx.core.spi.metrics.HttpServerMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -71,7 +70,7 @@ public class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServer
 
     @Override
     public Void connected(SocketMetric socketMetric, ServerWebSocket serverWebSocket) {
-        super.connected(serverWebSocket.remoteAddress());
+        super.connected(serverWebSocket.remoteAddress(), serverWebSocket.textHandlerID());
         return null;
     }
 

@@ -65,7 +65,7 @@ public class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClient
 
     @Override
     public Void connected(SocketMetric socketMetric, WebSocket serverWebSocket) {
-        super.connected(serverWebSocket.remoteAddress());
+        super.connected(serverWebSocket.remoteAddress(), serverWebSocket.textHandlerID());
         return null;
     }
 

@@ -39,9 +39,8 @@ public class HttpMetricsImpl extends TcpMetricsImpl implements TCPMetrics<Socket
     }
 
     @Override
-    public SocketMetric connected(SocketAddress remoteAddress) {
-        super.connected(remoteAddress);
-        return new SocketMetric();
+    public SocketMetric connected(SocketAddress remoteAddress, String remoteName) {
+        return super.connected(remoteAddress, remoteName);
     }
 
     @Override

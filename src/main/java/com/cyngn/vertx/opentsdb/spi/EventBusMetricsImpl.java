@@ -56,7 +56,9 @@ public class EventBusMetricsImpl extends ScheduledMetrics implements EventBusMet
     public EventBusMetricsImpl schedule() { return (EventBusMetricsImpl) super.schedule(); }
 
     @Override
-    public Object handlerRegistered(String address, boolean replyHandler) { return null; }
+    public Object handlerRegistered(String address, String repliedAddress) {
+        return null;
+    }
 
     @Override
     public void handlerUnregistered(Object handler) {  }

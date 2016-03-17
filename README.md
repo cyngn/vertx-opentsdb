@@ -17,7 +17,7 @@ Add a dependency to vertx-opentsdb:
 <dependency>
     <groupId>com.cyngn.vertx</groupId>
     <artifactId>vertx-opentsdb</artifactId>
-    <version>0.7.0</version>
+    <version>1.3.3.0</version>
 </dependency>
 ```
 
