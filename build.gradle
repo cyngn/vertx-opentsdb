@@ -2,7 +2,7 @@ apply plugin: 'java'
 // Uncomment below when doing official builds
 //apply from: "gradle/sona.gradle"
 
-version = '1.3.3.0'
+version = '3.3.0'
 group = "com.cyngn.vertx"
 archivesBaseName = "vertx-opentsdb"
 
@@ -35,7 +35,7 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
+    gradleVersion = '2.12'
 }
 
 task release() << {}
